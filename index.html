@@ -47,7 +47,8 @@
   thead th.gap-col{background:var(--bg) !important;}
   .table-wrap{overflow:auto;max-height:72vh;border:1px solid var(--border);border-radius:8px;}
   .search{margin-bottom:10px;display:flex;gap:8px;align-items:center;}
-  .search input{padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;width:260px;}
+  .search input{padding:8px 10px;border:2px solid var(--accent);border-radius:6px;font-size:13px;width:260px;transition:border-color .12s ease,box-shadow .12s ease;}
+  .search input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
   .stat-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
   .stat{background:var(--accent-light);border-radius:8px;padding:10px 16px;font-size:13px;border:2px solid transparent;user-select:none;}
   .stat.clickable{cursor:pointer;transition:all .12s ease;}
