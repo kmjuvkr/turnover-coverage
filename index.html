@@ -976,8 +976,7 @@ function renderReportList(){
 /* ---------- init ---------- */
 loadLeadtime();
 loadPersisted();
-const initialTab = state.monthKeys.length ? 'm'+state.monthKeys.slice().sort(keyCompare).pop() : 'annual';
-renderAll(initialTab);
+renderAll('annual');
 setupUpload();
 </script>
 </body>
