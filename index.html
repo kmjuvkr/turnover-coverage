@@ -49,6 +49,14 @@
   #outQtyTable td.out-max{background:#fde8b6;color:#92400e;font-weight:700;}
   #outQtyTable th.annual-sum-col-th{background:#e5e7eb;}
   #outQtyTable th.avg-col-th{background:#d6e7ee;}
+  #outQtyTable{table-layout:fixed;}
+  #outQtyTable th:nth-child(1), #outQtyTable td:nth-child(1){width:70px;}
+  #outQtyTable th:nth-child(2), #outQtyTable td:nth-child(2){width:190px;}
+  #outQtyTable th:nth-child(3), #outQtyTable td:nth-child(3){width:78px;}
+  #outQtyTable th:nth-child(4), #outQtyTable td:nth-child(4),
+  #outQtyTable th:nth-child(5), #outQtyTable td:nth-child(5){width:60px;}
+  #outQtyTable th:nth-child(n+6), #outQtyTable td:nth-child(n+6){width:62px;}
+  #outQtyTable th, #outQtyTable td{overflow:hidden;text-overflow:ellipsis;}
   .gap-col{border:none !important;background:var(--bg) !important;width:14px;padding:0 !important;}
   thead th.gap-col{background:var(--bg) !important;}
   .table-wrap{overflow:auto;max-height:72vh;border:1px solid var(--border);border-radius:8px;}
