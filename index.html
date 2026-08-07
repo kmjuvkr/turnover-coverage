@@ -50,9 +50,9 @@
   #outQtyTable th.annual-sum-col-th{background:#e5e7eb;}
   #outQtyTable th.avg-col-th{background:#d6e7ee;}
   #outQtyTable{table-layout:fixed;}
-  #outQtyTable th:nth-child(1), #outQtyTable td:nth-child(1){width:70px;}
-  #outQtyTable th:nth-child(2), #outQtyTable td:nth-child(2){width:190px;}
-  #outQtyTable th:nth-child(3), #outQtyTable td:nth-child(3){width:78px;}
+  #outQtyTable th:nth-child(1), #outQtyTable td:nth-child(1){width:58px;}
+  #outQtyTable th:nth-child(2), #outQtyTable td:nth-child(2){width:230px;}
+  #outQtyTable th:nth-child(3), #outQtyTable td:nth-child(3){width:66px;}
   #outQtyTable th:nth-child(4), #outQtyTable td:nth-child(4),
   #outQtyTable th:nth-child(5), #outQtyTable td:nth-child(5){width:60px;}
   #outQtyTable th:nth-child(n+6), #outQtyTable td:nth-child(n+6){width:62px;}
@@ -749,7 +749,7 @@ function renderOutQty(){
       cells += `<td class="${isMax?'out-max':''}">${out===null?'-':fmtInt(out)}</td>`;
     });
     return `<tr class="data-row" data-name="${(item.name||'').toLowerCase()}" data-code="${code}">
-      <td class="code">${code}</td><td class="name">${item.name||''}</td>
+      <td class="code">${code}</td><td class="name" title="${item.name||''}">${item.name||''}</td>
       <td class="annual-sum-col">${fmtInt(sum)}</td>
       <td class="avg-col">${fmtRound(avg3)}</td>
       <td class="avg-col">${fmtRound(avg6)}</td>
