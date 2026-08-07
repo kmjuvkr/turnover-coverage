@@ -130,6 +130,7 @@
     <div class="card">
       <div id="annualChart"></div>
       <div class="annual-box">
+        <div class="stat-row" id="annualStats"></div>
         <div class="toolbar">
           <div class="search"><input type="text" id="annualSearch" placeholder="품목코드 또는 품목이름 검색"></div>
           <div class="legend">
@@ -137,7 +138,6 @@
             <span><span class="dot low"></span>회전율 ≤ 0.05 (낮은 회전율)</span>
           </div>
         </div>
-        <div class="stat-row" id="annualStats"></div>
         <div class="table-wrap"><table id="annualTable"></table></div>
       </div>
     </div>
@@ -146,10 +146,10 @@
   <div class="panel" id="panel-outqty">
     <div class="card">
       <div class="annual-box">
+        <div class="stat-row" id="outQtyStats"></div>
         <div class="toolbar">
           <div class="search"><input type="text" id="outQtySearch" placeholder="품목코드 또는 품목이름 검색"></div>
         </div>
-        <div class="stat-row" id="outQtyStats"></div>
         <div class="table-wrap"><table id="outQtyTable"></table></div>
       </div>
     </div>
@@ -417,14 +417,6 @@ function renderMonthlyPanel(key){
 
   panel.innerHTML = `
     <div class="card">
-      <div class="toolbar">
-        <div class="search"><input type="text" data-key="${key}" class="monthSearch" placeholder="품목코드 또는 품목이름 검색" value="${filt.query}"></div>
-        <div class="legend">
-          <span><span class="dot high"></span>회전율 ≥ 0.25 : 높은 회전율, 판매량 수시체크 및 발주 집중검토</span>
-          <span><span class="dot low"></span>회전율 ≤ 0.05 : 낮은 회전율, 재고 소진방법 검토</span>
-          <span><span class="dot warn"></span>재고 커버리지 4개월 이내 : 발주 점검 필요</span>
-        </div>
-      </div>
       <div class="stat-row">
         <div class="stat clickable" data-stat="all" data-key="${key}">전체 품목 수<b>${rows.length}</b></div>
         <div class="stat clickable" data-stat="high" data-key="${key}">높은 회전율<b style="color:var(--high)">${highCount}</b></div>
@@ -434,6 +426,14 @@ function renderMonthlyPanel(key){
         <div class="export-group">
           <button class="export-btn" id="exportBtn-${key}" type="button">${EXPORT_ICON}엑셀</button>
           <button class="export-btn" id="exportPdfBtn-${key}" type="button">${PDF_ICON}PDF</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><input type="text" data-key="${key}" class="monthSearch" placeholder="품목코드 또는 품목이름 검색" value="${filt.query}"></div>
+        <div class="legend">
+          <span><span class="dot high"></span>회전율 ≥ 0.25 : 높은 회전율, 판매량 수시체크 및 발주 집중검토</span>
+          <span><span class="dot low"></span>회전율 ≤ 0.05 : 낮은 회전율, 재고 소진방법 검토</span>
+          <span><span class="dot warn"></span>재고 커버리지 4개월 이내 : 발주 점검 필요</span>
         </div>
       </div>
       <div class="table-wrap"><table id="table-m${key}"></table></div>
