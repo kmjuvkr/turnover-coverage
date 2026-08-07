@@ -45,7 +45,10 @@
   td.warn{background:var(--warn-bg);color:var(--warn-text);font-weight:700;}
   .out-sub{font-size:10px;font-weight:400;color:#9aa3ad;margin-top:1px;}
   #outQtyTable td.annual-sum-col{background:#eef0f2;font-weight:700;color:#374151;}
-  #outQtyTable th:nth-child(3){background:#e5e7eb;}
+  #outQtyTable td.avg-col{background:var(--accent-light);font-weight:700;color:var(--accent);}
+  #outQtyTable td.out-max{background:#fde8b6;color:#92400e;font-weight:700;}
+  #outQtyTable th.annual-sum-col-th{background:#e5e7eb;}
+  #outQtyTable th.avg-col-th{background:#d6e7ee;}
   .gap-col{border:none !important;background:var(--bg) !important;width:14px;padding:0 !important;}
   thead th.gap-col{background:var(--bg) !important;}
   .table-wrap{overflow:auto;max-height:72vh;border:1px solid var(--border);border-radius:8px;}
@@ -701,24 +704,47 @@ function renderOutQty(){
   const activeKeys = state.monthKeys.slice().sort(keyCompare);
   const year = activeKeys.length ? parseKey(activeKeys[0]).y : new Date().getFullYear();
   const allKeys = Array.from({length:12}, (_,i)=>makeKey(year, i+1));
-  const head1 = ['품목코드','품목이름','연간\n출고수량'];
+  const last3Keys = activeKeys.slice(-3);
+  const last6Keys = activeKeys.slice(-6);
+  const head1 = [
+    {label:'품목코드'}, {label:'품목이름'},
+    {label:'연간\n출고수량', cls:'annual-sum-col-th'},
+    {label:'평균 출고수량\n(3개월)', cls:'avg-col-th', title:`${last3Keys.map(k=>keyLabel(k)).join(', ')} 중 실제 데이터 있는 달만 평균`},
+    {label:'평균 출고수량\n(6개월)', cls:'avg-col-th', title:`${last6Keys.map(k=>keyLabel(k)).join(', ')} 중 실제 데이터 있는 달만 평균`}
+  ];
   const headCells = allKeys.map(k=>({key:k, label: parseKey(k).m+'월'}));
-  table.innerHTML = `<thead><tr>${head1.map(h=>`<th>${h}</th>`).join('')}${headCells.map(h=>`<th>${h.label}</th>`).join('')}</tr></thead>`;
+  table.innerHTML = `<thead><tr>${head1.map(h=>`<th class="${h.cls||''}"${h.title?` title="${h.title}"`:''}>${h.label}</th>`).join('')}${headCells.map(h=>`<th>${h.label}</th>`).join('')}</tr></thead>`;
 
   if(!state.outQtyFilter) state.outQtyFilter = {query:''};
+  const avgOfKeys = (item, keys)=>{
+    let s=0, c=0;
+    keys.forEach(k=>{
+      const md = item.monthly[k];
+      if(md && md.out!==null && md.out!==undefined && !isNaN(md.out)){ s+=md.out; c++; }
+    });
+    return c ? s/c : null;
+  };
   const bodyRows = state.order.map(code=>{
     const item = state.items[code];
-    let sum = 0;
-    let cells = '';
-    allKeys.forEach(k=>{
+    const outs = allKeys.map(k=>{
       const md = item.monthly[k];
       const out = md ? md.out : null;
-      if(out!==null && out!==undefined && !isNaN(out)) sum += out;
-      cells += `<td>${out===null||out===undefined?'-':fmtInt(out)}</td>`;
+      return (out!==null && out!==undefined && !isNaN(out)) ? out : null;
+    });
+    const sum = outs.reduce((a,b)=> a + (b||0), 0);
+    const avg3 = avgOfKeys(item, last3Keys);
+    const avg6 = avgOfKeys(item, last6Keys);
+    const maxOut = Math.max(...outs.filter(v=>v!==null), 0);
+    let cells = '';
+    outs.forEach(out=>{
+      const isMax = maxOut>0 && out===maxOut;
+      cells += `<td class="${isMax?'out-max':''}">${out===null?'-':fmtInt(out)}</td>`;
     });
     return `<tr class="data-row" data-name="${(item.name||'').toLowerCase()}" data-code="${code}">
       <td class="code">${code}</td><td class="name">${item.name||''}</td>
       <td class="annual-sum-col">${fmtInt(sum)}</td>
+      <td class="avg-col">${fmtRound(avg3)}</td>
+      <td class="avg-col">${fmtRound(avg6)}</td>
       ${cells}
     </tr>`;
   }).join('');
