@@ -44,6 +44,8 @@
   td.low{background:var(--low-bg);color:var(--low);font-weight:700;}
   td.warn{background:var(--warn-bg);color:var(--warn-text);font-weight:700;}
   .out-sub{font-size:10px;font-weight:400;color:#9aa3ad;margin-top:1px;}
+  #outQtyTable td.annual-sum-col{background:#eef0f2;font-weight:700;color:#374151;}
+  #outQtyTable th:nth-child(3){background:#e5e7eb;}
   .gap-col{border:none !important;background:var(--bg) !important;width:14px;padding:0 !important;}
   thead th.gap-col{background:var(--bg) !important;}
   .table-wrap{overflow:auto;max-height:72vh;border:1px solid var(--border);border-radius:8px;}
@@ -522,19 +524,25 @@ function renderAnnual(){
   if(!state.annualFilter) state.annualFilter = {query:'', stat:null};
   let annualHigh=0, annualLow=0;
   const avgList = [];
+  const last3Keys = new Set(allKeys.slice(-3));
   const bodyRows = state.order.map(code=>{
     const item = state.items[code];
     let sum=0, cnt=0;
+    let recentSum=0, recentCnt=0;
     let cells = '';
     allKeys.forEach(k=>{
       const md = item.monthly[k];
       const v = md ? md.turnover : null;
-      if(v!==null && v!==undefined && !isNaN(v)){ sum+=v; cnt++; }
+      if(v!==null && v!==undefined && !isNaN(v)){
+        sum+=v; cnt++;
+        if(last3Keys.has(k)){ recentSum+=v; recentCnt++; }
+      }
       const cls = turnoverClass(v);
       cells += `<td class="${cls}">${v===null||v===undefined?'-':fmt(v,3)}</td>`;
     });
     const annualAvg = cnt? sum/cnt : null;
-    if(annualAvg!==null) avgList.push({code, name: item.name||'', avg: annualAvg});
+    const recentAvg = recentCnt? recentSum/recentCnt : null;
+    if(annualAvg!==null) avgList.push({code, name: item.name||'', avg: annualAvg, recentAvg});
     const turnCls = turnoverClass(annualAvg);
     if(turnCls==='high') annualHigh++;
     if(turnCls==='low') annualLow++;
@@ -591,14 +599,16 @@ function renderAnnualChart(){
   if(!box || !annualChartData) return;
   const allKeys = annualChartData.allKeys;
   const cat = CHART_CATS.find(c=>c.id===annualChartCat) || CHART_CATS[0];
+  const last3Months = allKeys.slice(-3).map(k=>parseKey(k).m);
+  const last3Label = last3Months.length>1 ? `${last3Months[0]}~${last3Months[last3Months.length-1]}월` : `${last3Months[0]}월`;
   const top = annualChartData.avgList
-    .filter(t=>cat.match(String(t.code)))
-    .sort((a,b)=>b.avg-a.avg)
+    .filter(t=>cat.match(String(t.code)) && t.recentAvg!==null)
+    .sort((a,b)=>b.recentAvg-a.recentAvg)
     .slice(0,5);
 
   const catBtns = `<div class="chart-cats">${CHART_CATS.map(c=>
     `<button class="chart-cat-btn${c.id===annualChartCat?' active':''}" data-cat="${c.id}">${c.label}</button>`).join('')}</div>`;
-  const titleHtml = `<div class="chart-head"><div class="chart-title">높은 회전율 TOP 5 품목${cat.id==='all'?'':' · '+cat.label} · 월별 회전율 추이</div>${catBtns}</div>`;
+  const titleHtml = `<div class="chart-head"><div class="chart-title">최근 3개월(${last3Label}) 평균 회전율 TOP 5 품목${cat.id==='all'?'':' · '+cat.label} · 월별 회전율 추이</div>${catBtns}</div>`;
 
   const wireCatBtns = ()=>{
     box.querySelectorAll('.chart-cat-btn').forEach(b=>{
@@ -624,7 +634,7 @@ function renderAnnualChart(){
       if(v!==null && v!==undefined && !isNaN(v)){ maxV = Math.max(maxV, v); return v; }
       return null;
     });
-    return {code:t.code, name:t.name, avg:t.avg, vals};
+    return {code:t.code, name:t.name, avg:t.avg, recentAvg:t.recentAvg, vals};
   });
   if(maxV<=0) maxV = 1;
   const yMax = maxV*1.08;
@@ -655,9 +665,9 @@ function renderAnnualChart(){
 
   box.innerHTML = `
     ${titleHtml}
-    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="높은 회전율 상위 5개 품목의 월별 회전율 추이 그래프">${grid}${ylab}${xlab}${lines}</svg>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="최근 3개월(${last3Label}) 평균 회전율 상위 5개 품목의 월별 회전율 추이 그래프">${grid}${ylab}${xlab}${lines}</svg>
     <div class="chart-legend">${series.map((s,si)=>
-      `<span data-idx="${si}"><span class="dot2" style="background:${colors[si]}"></span>${s.code} ${s.name} (연간 ${fmt(s.avg,3)})</span>`).join('')}</div>`;
+      `<span data-idx="${si}"><span class="dot2" style="background:${colors[si]}"></span>${s.code} ${s.name} (최근 3개월 평균 ${fmt(s.recentAvg,3)})</span>`).join('')}</div>`;
 
   const svg = box.querySelector('svg');
   box.querySelectorAll('.chart-legend span[data-idx]').forEach(el=>{
@@ -688,7 +698,9 @@ function applyAnnualFilter(){
 
 function renderOutQty(){
   const table = document.getElementById('outQtyTable');
-  const allKeys = state.monthKeys.slice().sort(keyCompare);
+  const activeKeys = state.monthKeys.slice().sort(keyCompare);
+  const year = activeKeys.length ? parseKey(activeKeys[0]).y : new Date().getFullYear();
+  const allKeys = Array.from({length:12}, (_,i)=>makeKey(year, i+1));
   const head1 = ['품목코드','품목이름','연간\n출고수량'];
   const headCells = allKeys.map(k=>({key:k, label: parseKey(k).m+'월'}));
   table.innerHTML = `<thead><tr>${head1.map(h=>`<th>${h}</th>`).join('')}${headCells.map(h=>`<th>${h.label}</th>`).join('')}</tr></thead>`;
@@ -706,7 +718,7 @@ function renderOutQty(){
     });
     return `<tr class="data-row" data-name="${(item.name||'').toLowerCase()}" data-code="${code}">
       <td class="code">${code}</td><td class="name">${item.name||''}</td>
-      <td>${fmtInt(sum)}</td>
+      <td class="annual-sum-col">${fmtInt(sum)}</td>
       ${cells}
     </tr>`;
   }).join('');
