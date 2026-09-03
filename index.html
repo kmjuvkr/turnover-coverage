@@ -38,6 +38,7 @@
   .dot.high{background:var(--high-bg);border:1px solid var(--high);}
   .dot.low{background:var(--low-bg);border:1px solid var(--low);}
   .dot.warn{background:var(--warn-bg);border:1px solid var(--warn-text);}
+  .dot.out-max{background:#fde8b6;border:1px solid #92400e;}
   table{border-collapse:collapse;width:100%;font-size:12.5px;}
   thead th{position:sticky;top:0;background:#f9fafb;border:1px solid var(--border);padding:8px 6px;text-align:center;white-space:pre-line;font-weight:700;color:#374151;}
   tbody td{border:1px solid var(--border);padding:6px 6px;text-align:right;white-space:nowrap;}
@@ -159,6 +160,9 @@
         <div class="stat-row" id="outQtyStats"></div>
         <div class="toolbar">
           <div class="search"><input type="text" id="outQtySearch" placeholder="품목코드 또는 품목이름 검색"></div>
+          <div class="legend">
+            <span><span class="dot out-max"></span>품목별 최다 출고월</span>
+          </div>
         </div>
         <div class="table-wrap"><table id="outQtyTable"></table></div>
       </div>
